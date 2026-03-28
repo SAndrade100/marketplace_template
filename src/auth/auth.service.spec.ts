@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const mockUser = {
@@ -10,7 +11,7 @@ const mockUser = {
   name: 'Test User',
   email: 'test@example.com',
   password: 'hashedpassword',
-  role: 'BUYER',
+  role: Role.BUYER,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -43,18 +44,24 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get a user by ID (Admin only)' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findOne(id);
+    const { password, ...result } = user;
+    return result;
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
+  @ApiResponse({ status: 403, description: 'Forbidden - can only update own profile' })
   @ApiResponse({ status: 404, description: 'User not found' })
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUser() currentUser: any,
   ) {
+    if (id !== currentUser.id && currentUser.role !== Role.ADMIN) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
     return this.usersService.update(id, updateUserDto);
   }
 

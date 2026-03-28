@@ -31,6 +31,14 @@ export class CategoriesService {
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     await this.findOne(id);
+    if (updateCategoryDto.slug) {
+      const existing = await this.prisma.category.findFirst({
+        where: { slug: updateCategoryDto.slug, NOT: { id } },
+      });
+      if (existing) {
+        throw new ConflictException('Category with this slug already exists');
+      }
+    }
     return this.prisma.category.update({
       where: { id },
       data: updateCategoryDto,

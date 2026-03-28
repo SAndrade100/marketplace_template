@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductDto } from './dto/filter-product.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class ProductsService {
@@ -63,7 +64,7 @@ export class ProductsService {
 
   async update(id: string, updateProductDto: UpdateProductDto, userId: string, userRole: string) {
     const product = await this.findOne(id);
-    if (product.sellerId !== userId && userRole !== 'ADMIN') {
+    if (product.sellerId !== userId && userRole !== Role.ADMIN) {
       throw new ForbiddenException('You can only update your own products');
     }
     return this.prisma.product.update({
@@ -75,7 +76,7 @@ export class ProductsService {
 
   async remove(id: string, userId: string, userRole: string) {
     const product = await this.findOne(id);
-    if (product.sellerId !== userId && userRole !== 'ADMIN') {
+    if (product.sellerId !== userId && userRole !== Role.ADMIN) {
       throw new ForbiddenException('You can only delete your own products');
     }
     return this.prisma.product.delete({ where: { id } });
